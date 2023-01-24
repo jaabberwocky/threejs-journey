@@ -26,6 +26,9 @@ const renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector('canvas.webgl'),
 })
 console.log(renderer);
-
 renderer.setSize(sizes.width, sizes.height);
+
+// move camera backwards
+camera.position.z = 3;
+camera.position.y = 1;
 renderer.render(scene, camera);
