@@ -73,7 +73,9 @@ const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
     // Update objects
-    // mesh.rotation.y = elapsedTime;
+    mesh.rotation.y = Math.PI * elapsedTime / 8;
+
+    console.log(mesh.rotation);
 
     // // update camera
     // if (Math.abs(cursor.x) == 0.5) {
