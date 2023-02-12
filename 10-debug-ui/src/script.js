@@ -3,6 +3,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import gsap from 'gsap'
 import GUI from 'lil-gui'
 
+
+const image = new Image();
+image.onload = () => {
+    console.log('image loaded')
+}
+image.src = '../static/textures/door/color.jpg'
+
 /* 
 Debug UI
 */
