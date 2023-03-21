@@ -74,7 +74,7 @@ const environmentMapTexture = cubeTextureLoader.load([
 
 const material = new THREE.MeshStandardMaterial({
     side: THREE.DoubleSide,
-    color: new THREE.Color(0xe96754),
+    color: new THREE.Color('rgb(255,0,0)'),
 })
 material.metalness = 0.7
 material.roughness = 0.2
