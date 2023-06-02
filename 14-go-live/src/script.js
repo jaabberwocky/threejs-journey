@@ -2,7 +2,14 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js'
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShader.js';
+import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
 import * as dat from 'lil-gui'
+import { check } from 'prettier';
 
 /**
  * Base
@@ -20,13 +27,23 @@ const scene = new THREE.Scene()
  * Textures
  */
 const textureLoader = new THREE.TextureLoader()
-const matcapTexture = textureLoader.load('textures/matcaps/8.png')
-const matcapTextureFont = textureLoader.load('textures/matcaps/2.png')
+const matcapTexture = textureLoader.load('textures/matcaps/3.png')
+const matcapTextureFont = textureLoader.load('textures/matcaps/8.png')
 
 /**
  * Fonts
  */
 const fontLoader = new FontLoader()
+
+/**
+ * utility functions
+ */
+const checkIntersection = (mesh1, mesh2) => {
+    let bbox1 = new THREE.Box3().setFromObject(mesh1)
+    let bbox2 = new THREE.Box3().setFromObject(mesh2)
+
+    return bbox1.intersectsBox(bbox2)
+}
 
 fontLoader.load(
     '/fonts/helvetiker_regular.typeface.json',
@@ -58,11 +75,39 @@ fontLoader.load(
         // Donuts
         const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64)
 
-        for (let i = 0; i < 100; i++) {
+        // create spheres
+        for (let i = 0; i < 150; i++) {
+            // random color
+            let randomColor = '#' + (Math.floor(Math.random() * 2 ** 24)).toString(16).padStart(0, 6)
+            const tetraMaterial = new THREE.MeshPhongMaterial({ color: randomColor, wireframe: false })
+            const sphere = new THREE.Mesh(
+                new THREE.SphereGeometry(1, 4, 4),
+                tetraMaterial
+            )
+            sphere.position.x = (Math.random() - 0.5) * 10
+            sphere.position.y = (Math.random() - 0.5) * 10
+            sphere.position.z = (Math.random() - 0.5) * 10
+
+            if (checkIntersection(sphere, text)) {
+                continue
+            }
+            sphere.rotation.x = Math.random() * Math.PI
+            sphere.rotation.y = Math.random() * Math.PI
+            const scale = Math.random()
+            sphere.scale.set(scale, scale, scale)
+
+            scene.add(sphere);
+        }
+
+        for (let i = 0; i < 50; i++) {
             const donut = new THREE.Mesh(donutGeometry, material)
             donut.position.x = (Math.random() - 0.5) * 10
             donut.position.y = (Math.random() - 0.5) * 10
             donut.position.z = (Math.random() - 0.5) * 10
+
+            if (checkIntersection(donut, text)) {
+                continue
+            }
             donut.rotation.x = Math.random() * Math.PI
             donut.rotation.y = Math.random() * Math.PI
             const scale = Math.random()
@@ -72,6 +117,10 @@ fontLoader.load(
         }
     }
 )
+
+// add lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+scene.add(ambientLight)
 
 /**
  * Sizes
@@ -118,6 +167,32 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
+// post processing
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const glitchPass = new GlitchPass();
+composer.addPass(glitchPass);
+
+const outputPass = new ShaderPass(GammaCorrectionShader);
+composer.addPass(outputPass);
+
+const params = {
+    shape: 1,
+    radius: 5,
+    rotateR: Math.PI / 12,
+    rotateB: Math.PI / 12 * 2,
+    rotateG: Math.PI / 12 * 3,
+    scatter: 0,
+    blending: 1,
+    blendingMode: 1,
+    greyscale: false,
+    disable: false
+};
+const halftonePass = new HalftonePass(window.innerWidth, window.innerHeight, params);
+composer.addPass(halftonePass);
+
 /**
  * Animate
  */
@@ -135,7 +210,7 @@ const tick = () => {
     controls.update()
 
     // Render
-    renderer.render(scene, camera)
+    composer.render();
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
