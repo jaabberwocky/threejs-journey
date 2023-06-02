@@ -117,8 +117,9 @@ fontLoader.load(
 )
 
 // add lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 1)
-scene.add(ambientLight)
+const directionalLight = new THREE.DirectionalLight(0x00fffc, 2)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+scene.add(directionalLight, ambientLight)
 
 /**
  * Sizes
