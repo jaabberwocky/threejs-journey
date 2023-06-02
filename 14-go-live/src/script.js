@@ -8,8 +8,6 @@ import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShader.js';
 import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
-import * as dat from 'lil-gui'
-import { check } from 'prettier';
 
 /**
  * Base
