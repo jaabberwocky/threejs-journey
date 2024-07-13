@@ -8,6 +8,7 @@ import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShader.js';
 import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
+import * as dat from 'lil-gui'
 
 /**
  * Base
@@ -20,6 +21,9 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
+
+// gui
+const gui = new dat.GUI()
 
 /**
  * Textures
@@ -121,6 +125,8 @@ const directionalLight = new THREE.DirectionalLight(0x00fffc, 2)
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
 scene.add(directionalLight, ambientLight)
 
+gui.add(directionalLight, 'intensity').min(0).max(10).step(0.001)
+
 /**
  * Sizes
  */
@@ -170,9 +176,6 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-
-const glitchPass = new GlitchPass();
-composer.addPass(glitchPass);
 
 const outputPass = new ShaderPass(GammaCorrectionShader);
 composer.addPass(outputPass);
